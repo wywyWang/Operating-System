@@ -1,0 +1,28 @@
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+
+#define MAX_LINE 80
+
+int main(void)
+{
+	char *arg[MAX_LINE/2+1]; /*command line arguments*/
+	int should_run = 1; /*flag to determine when to exit program*/
+	
+	while(should_run){
+		printf("osh>");
+		fflush(stdout);
+		gets(*arg);
+		
+		/**
+		* your code!
+		* After reading user input, the step are:
+		* (1) fork a child process using fork()
+		* (2) the child process will invoke execvp()
+		* (3) if command included &, parent will invoke wait()
+		*/
+	}
+
+	return 0;
+}
+
