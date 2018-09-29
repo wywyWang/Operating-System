@@ -6,6 +6,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <signal.h>
 
 #define MAX_LINE 80
 
@@ -18,14 +19,17 @@ int main(void)
 	memset(inputBuffer, '\0', sizeof(inputBuffer));
 
 	while(should_run){
-		int length,background=0,status;
+		int length,background=0,status=0;
 		pid_t pid;
+		/* TODO*/
+		if(pid>0){
+			signal (SIGCHLD,SIG_IGN);
+		}
+		
 		printf("osh>");
 		fflush(stdout);
 		length = read(STDIN_FILENO, inputBuffer, MAX_LINE);
 		length = strlen(inputBuffer);
-		// printf("len = %d\n",length);
-		// printf("inputbuffer = %s\n",inputBuffer);
 		int start=-1,cnt=0;
 		for(int i=0;i<length;i++){
 			switch(inputBuffer[i]){
@@ -63,16 +67,21 @@ int main(void)
 			break;
 		}
 		pid=fork();
+		printf("Before,I'm the child %d, my parent is %d.\n",getpid(),getppid());
 		if(pid==0){
 			status=execvp(*arg,arg);
 			if(status<0){
 				// fprintf(stderr,"ERROR:Can't execute %s\n",arg[0]);
-				exit(1);
+				return 0;
 			}
 		}
-		else if(background==0){
-			wait(NULL);
+		if(background==0){
+			sleep(1);
+			wait(&status);
+			kill(pid,SIGKILL);
+			printf("HELLO!!\n");
 		}
+		printf("After,I'm the child %d, my parent is %d.\n",getpid(),getppid());
 		/**
 		* your code!
 		* After reading user input, the step are:
