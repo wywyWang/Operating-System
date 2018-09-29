@@ -17,7 +17,7 @@ int main(){
         if(pid_c1==0)
             printf("Fork2, I'm the child %d, my parent is %d.\n",getpid(),getppid());
     }
-    wait(NULL);
+    wait(&status);
     pid_c2=fork();
     if(pid_c2==0)
         printf("Fork3, I'm the child %d, my parent is %d.\n",getpid(),getppid());
