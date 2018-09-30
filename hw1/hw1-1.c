@@ -22,9 +22,9 @@ int main(void)
 		int length,background=0,status=0;
 		pid_t pid;
 		/* TODO*/
-		if(pid>0){
-			signal (SIGCHLD,SIG_IGN);
-		}
+		// if(pid>0){
+		// 	signal (SIGCHLD,SIG_IGN);
+		// }
 		
 		printf("osh>");
 		fflush(stdout);
@@ -67,7 +67,7 @@ int main(void)
 			break;
 		}
 		pid=fork();
-		printf("Before,I'm the child %d, my parent is %d.\n",getpid(),getppid());
+		// printf("Before,I'm the child %d, my parent is %d.\n",getpid(),getppid());
 		if(pid==0){
 			status=execvp(*arg,arg);
 			if(status<0){
@@ -78,10 +78,10 @@ int main(void)
 		if(background==0){
 			sleep(1);
 			wait(&status);
-			kill(pid,SIGKILL);
-			printf("HELLO!!\n");
+			// kill(pid,SIGKILL);
+			// printf("HELLO!!\n");
 		}
-		printf("After,I'm the child %d, my parent is %d.\n",getpid(),getppid());
+		// printf("After,I'm the child %d, my parent is %d.\n",getpid(),getppid());
 		/**
 		* your code!
 		* After reading user input, the step are:
