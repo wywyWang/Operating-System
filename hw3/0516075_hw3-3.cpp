@@ -5,6 +5,8 @@
 #include <vector>
 #include <queue>
 #include <algorithm>
+#include <math.h>
+#include <iomanip>  
 using namespace std;
 
 typedef struct{
@@ -12,10 +14,13 @@ typedef struct{
     int at;             //arrive time
     int bt;             //burst time
     int rec_bt;         //static burst time
-    int ft;             //first in time
-    int et;             //end time
     bool inqueue;
 }Process;
+
+typedef struct{
+    int ft;
+    int et;
+}Result;
 
 bool comp (Process i,Process j) { return (i.at<j.at); }
 
@@ -26,9 +31,11 @@ int main (int argc, char* argv[]) {
     int n,tq,sum=0;
     vector <Process> P;
     queue <Process> q;
+    vector <Result> r;
     if (fin.is_open()){
         fin >>  n;
         P.resize(n);
+        r.resize(n);
         for (int i = 0; i < n; i++){
             P[i].p=i;
             P[i].inqueue=0;
@@ -52,7 +59,6 @@ int main (int argc, char* argv[]) {
         for(int i=0;i<n;i++){
             if((P[i].at-now<=0)&&P[i].inqueue==0&&P[i].bt>0){
                 P[i].inqueue=1;
-                // cout<<"P[i] = "<<P[i].p<<endl;
                 q.push(P[i]);
             }
         }
@@ -64,12 +70,12 @@ int main (int argc, char* argv[]) {
         q.pop();
 
         if(first[tmp.p]==0){
-            P[tmp.p].ft=now;
+            r[tmp.p].ft=now;
             first[tmp.p]=1;
         }
         for(int i=1;i<=tq;i++){
             if((tmp.bt-1)==0){
-                P[tmp.p].et=now+1;
+                r[tmp.p].et=now+1;
                 P[tmp.p].bt=0;
                 tmp.bt--;
                 now++;
@@ -83,7 +89,6 @@ int main (int argc, char* argv[]) {
         for(int j=0;j<n;j++){
             if((P[j].at-now<=0)&&P[j].inqueue==0&&P[j].bt>0){
                 P[j].inqueue=1;
-                // cout<<"P[j] = "<<P[j].p<<endl;
                 q.push(P[j]);
             }
         }
@@ -99,8 +104,8 @@ int main (int argc, char* argv[]) {
     int wt[n],tt[n];
     int sumwt=0,sumtt=0;
     for(int i=0;i<n;i++){
-        wt[i]=P[i].et-P[i].at-P[i].rec_bt;
-        tt[i]=P[i].et-P[i].at;
+        wt[i]=r[i].et-P[i].at-P[i].rec_bt;
+        tt[i]=r[i].et-P[i].at;
     }
     for(int i=0;i<n;i++){
         // cout<<P[i].p<<"\t\t"<<wt[i]<<"\t\t"<<tt[i]<<endl;
@@ -110,6 +115,8 @@ int main (int argc, char* argv[]) {
     }
     float avwt=(float)sumwt/n;
     float avtt=(float)sumtt/n;
-    fout<<avwt<<endl;
-    fout<<avtt<<endl;
+    int decide_avwt=log10(avwt);
+    fout<<setprecision(decide_avwt+6)<<avwt<<endl;
+    int decide_avtt=log10(avtt);
+    fout<<setprecision(decide_avtt+6)<<avtt<<endl;
 }
