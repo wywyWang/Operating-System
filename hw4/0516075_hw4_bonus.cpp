@@ -78,7 +78,7 @@ unsigned char MeanFilter(int w, int h)
 
 unsigned char gx_sobelFilter(int w, int h)
 {
-	int tmp = 0,tmp2=0;
+	int tmp = 0;
 	int a, b;
 	int ws = (int)sqrt((float)SOBEL_FILTER_SIZE);
 	for (int j = 0; j<ws; j++)
@@ -91,15 +91,31 @@ unsigned char gx_sobelFilter(int w, int h)
 		if (a<0 || b<0 || a>=imgWidth || b>=imgHeight) continue;
 
 		tmp += filter_gx[j*ws + i] * pic_mean[b*imgWidth + a];
-		tmp2 += filter_gy[j*ws + i] * pic_mean[b*imgWidth + a];
 	};
 	if (tmp < 0) tmp = 0;
 	if (tmp > 255) tmp = 255;
-	if (tmp2 < 0) tmp2 = 0;
-	if (tmp2 > 255) tmp2 = 255;
+	return (unsigned char)tmp;
+}
 
-	pic_gx[h*imgWidth + w]=tmp;
-	pic_gy[h*imgWidth + w]=tmp2;
+unsigned char gy_sobelFilter(int w, int h)
+{
+	int tmp = 0;
+	int a, b;
+	int ws = (int)sqrt((float)SOBEL_FILTER_SIZE);
+	for (int j = 0; j<ws; j++)
+	for (int i = 0; i<ws; i++)
+	{
+		a = w + i - (ws / 2);
+		b = h + j - (ws / 2);
+
+		// detect for borders of the image
+		if (a<0 || b<0 || a>=imgWidth || b>=imgHeight) continue;
+
+		tmp += filter_gy[j*ws + i] * pic_mean[b*imgWidth + a];
+	};
+	if (tmp < 0) tmp = 0;
+	if (tmp > 255) tmp = 255;
+	return (unsigned char)tmp;
 }
 
 unsigned char sobelFilter(int w, int h)
@@ -112,14 +128,22 @@ unsigned char sobelFilter(int w, int h)
 }
 
 void *compute_gx(void* idx){
-    //apply the Mean filter to the image
-	for (int j = 0; j<imgHeight; j++) {
-		for (int i = 0; i<imgWidth; i++){
-			pic_mean[j*imgWidth + i] = MeanFilter(i, j);
-			sem_post(&sem[j][i]);	
-			sem_post(&sem[j][i]);	
-		}
-	}
+
+	//apply the gx_sobel filter to the image
+    for (int j = 0; j<imgHeight; j++) {
+        for (int i = 0; i<imgWidth; i++){
+            // cout<<"gx : "<<" i = "<<i<<" j = "<<j<<endl;
+            if(j == imgHeight-1 && i == imgWidth-1)sem_wait(&sem[j][i]);
+            else if(i == imgWidth-1)sem_wait(&sem[j+1][i]);
+            else if(j == imgHeight-1)sem_wait(&sem[j][i+1]);
+            else sem_wait(&sem[j+1][i+1]);
+            pic_gx[j*imgWidth + i] = gx_sobelFilter(i, j);
+			if(j == imgHeight-1 && i == imgWidth-1)sem_post(&sem[j][i]);
+            else if(i == imgWidth-1)sem_post(&sem[j+1][i]);
+            else if(j == imgHeight-1)sem_post(&sem[j][i+1]);
+            else sem_post(&sem[j+1][i+1]);
+        }
+    }
 
     pthread_exit(NULL);
 }
@@ -134,7 +158,7 @@ void *compute_gy(void* idx){
             else if(i == imgWidth-1)sem_wait(&sem[j+1][i]);
             else if(j == imgHeight-1)sem_wait(&sem[j][i+1]);
             else sem_wait(&sem[j+1][i+1]);
-			gx_sobelFilter(i, j);
+            pic_gy[j*imgWidth + i] = gy_sobelFilter(i, j);
 			if(j == imgHeight-1 && i == imgWidth-1)sem_post(&sem[j][i]);
             else if(i == imgWidth-1)sem_post(&sem[j+1][i]);
             else if(j == imgHeight-1)sem_post(&sem[j][i+1]);
@@ -170,6 +194,12 @@ int main()
 	BmpReader* bmpReader = new BmpReader();
 	for (int k = 0; k<5; k++){
 
+        for(int i=0;i<1861;i++){
+            for(int j=0;j<2631;j++){
+                sem_init(&sem[i][j],0,0);
+            }
+        }
+
 		// read input BMP file
 		pic_in = bmpReader->ReadBMP(inputfile_name[k], &imgWidth, &imgHeight);
 		// allocate space for output image
@@ -183,7 +213,6 @@ int main()
 		//convert RGB image to grey image
 		for (int j = 0; j<imgHeight; j++) {
 			for (int i = 0; i<imgWidth; i++){
-				sem_init(&sem[j][i],0,0);
 				pic_grey[j*imgWidth + i] = RGB2grey(i, j);
 			}
 		}
@@ -191,7 +220,14 @@ int main()
         pthread_create(&t1,NULL,compute_gx,(void*) &id[0]);
         pthread_create(&t2,NULL,compute_gy,(void*) &id[0]);
 		
-		
+		//apply the Mean filter to the image
+		for (int j = 0; j<imgHeight; j++) {
+			for (int i = 0; i<imgWidth; i++){
+				pic_mean[j*imgWidth + i] = MeanFilter(i, j);
+                sem_post(&sem[j][i]);	
+				sem_post(&sem[j][i]);	
+			}
+		}
         pthread_join(t1,NULL);
         pthread_join(t2,NULL);
 
