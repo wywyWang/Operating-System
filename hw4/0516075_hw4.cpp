@@ -46,18 +46,15 @@ void *compute_mean(void* idx)
 		for (int w = 0; w<imgWidth; w++){
 
 			int tmp = 0;
-			int a, b , window[9],k=0,sum=0;
-			// int ws = (int)sqrt((float)MEAN_FILTER_SIZE);
+			int a, b ,k=0,sum=0;
 			int ws=3;
 			for (int j = 0; j<ws; j++)
 			for (int i = 0; i<ws; i++)
 			{
 				a = w + i - (ws / 2);
 				b = h + j - (ws / 2);
-
 				// detect for borders of the image
 				if (a<0 || b<0 || a>=imgWidth || b>=imgHeight)continue;
-
 				sum=sum+pic_grey[b*imgWidth + a];
 			};
 
@@ -173,7 +170,6 @@ int main()
 				pic_in[3 * (h*imgWidth + w) + MYRED] +
 				pic_in[3 * (h*imgWidth + w) + MYGREEN] +
 				pic_in[3 * (h*imgWidth + w) + MYBLUE] )/3;
-
 				if (tmp < 0) tmp = 0;
 				if (tmp > 255) tmp = 255;
 				pic_grey[h*imgWidth + w] = tmp;
