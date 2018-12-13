@@ -165,8 +165,6 @@ int main()
 		pic_gy = (unsigned char*)malloc(imgWidth*imgHeight*sizeof(unsigned char));
 		pic_sobel = (unsigned char*)malloc(imgWidth*imgHeight*sizeof(unsigned char));
 		pic_final = (unsigned char*)malloc(3 * imgWidth*imgHeight*sizeof(unsigned char));
-	
-		// RGB2grey();
 
 		for (int h = 0; h<imgHeight; h++) {
 			for (int w = 0; w<imgWidth; w++){
