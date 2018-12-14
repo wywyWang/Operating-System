@@ -18,7 +18,7 @@ int imgWidth, imgHeight;
 int SOBEL_FILTER_SIZE;
 int *filter_gx, *filter_gy;
 
-sem_t sem[1861][2631];
+sem_t sem[6000][6000];
 
 const char *inputfile_name[5] = {
 	"input1.bmp",
@@ -38,7 +38,7 @@ const char *outputMed_name[5] = {
 
 unsigned char *pic_in,*pic_final;
 
-unsigned char pic_grey[1861*2631],pic_mean[1861*2631],pic_gx[1861*2631],pic_gy[1861*2631],pic_sobel[1861*2631];
+unsigned char pic_grey[6000*6000],pic_mean[6000*6000],pic_gx[6000*6000],pic_gy[6000*6000],pic_sobel[6000*6000];
 
 void *compute_mean(void* idx)
 {
